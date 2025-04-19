@@ -50,24 +50,34 @@ class TrainTicketEstimatorTest {
     /*
     * ### Typologie de passager
     * Si le passager est un enfant, alors :
-    * S'il a moins d'un an à la date du voyage, c'est gratuit (en même temps, il n'aura pas de siège attribué)
-    * S'il a 3 ans ou moins, c'est un tarif fixe de 9 euros
     * Jusqu'à 18 ans, il a 40% de réduction par rapport au tarif de base.
     * Si le passager est un senior (>= 70ans), alors il bénéficie de 20% de réduction
     * Dans tous les autres cas, c'est +20% (Hé quoi, il faut bien qu'on fasse du profit !)
     */
 
-
     @Test
     void shouldReturnFixedPriceAt9_For3yoChild() {
-
         this.addPassenger(3, List.of());
 
         double estimatedPrice = this.helperTicketEstimator(40);
         assertEquals(9,
                 estimatedPrice
                 );
+    }
 
+    // TODO Demander au metier si c'est normal d'avoir un tarifs de 0 Si il n'y a pas de passager ???
+    // TODO Devrait lever une exception pour dire qu'il n'y a pas de passagers
+
+
+
+    @Test
+    void shouldReturn40percentDiscount_ForPassengerUnder18() {
+        this.addPassenger(17, List.of());
+
+        double estimatedPrice = this.helperTicketEstimator(40);
+        assertEquals(60,
+                estimatedPrice
+        );
     }
 
     /*
