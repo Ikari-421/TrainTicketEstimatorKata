@@ -47,13 +47,16 @@ class TrainTicketEstimatorTest {
         return tte.estimate(trainDetails, fakeApiCall);
     }
 
-    /*
-    * ### Typologie de passager
-    * Si le passager est un enfant, alors :
-    * Jusqu'à 18 ans, il a 40% de réduction par rapport au tarif de base.
-    * Si le passager est un senior (>= 70ans), alors il bénéficie de 20% de réduction
-    * Dans tous les autres cas, c'est +20% (Hé quoi, il faut bien qu'on fasse du profit !)
-    */
+    @Test
+    void shouldReturn0_ChildUnder1yo() {
+        this.addPassenger(0, List.of());
+
+        double estimatedPrice = this.helperTicketEstimator(40);
+        // TODO Voir pourquoi on à -20.0 au lieu de 0 dans cette condition
+        assertEquals(-20.0,
+                estimatedPrice
+        );
+    }
 
     @Test
     void shouldReturnFixedPriceAt9_For3yoChild() {
@@ -68,27 +71,35 @@ class TrainTicketEstimatorTest {
     // TODO Demander au metier si c'est normal d'avoir un tarifs de 0 Si il n'y a pas de passager ???
     // TODO Devrait lever une exception pour dire qu'il n'y a pas de passagers
 
-
+    /*
+     * Dans tous les autres cas, c'est +20% (Hé quoi, il faut bien qu'on fasse du profit !)
+     */
 
     @Test
-    void shouldReturn40percentDiscount_ForPassengerUnder18() {
+    void shouldReturn40percentDiscount_ForPassengerUnder18yo_AndOver30daysBeforeDeparture() {
         this.addPassenger(17, List.of());
 
         double estimatedPrice = this.helperTicketEstimator(40);
-        assertEquals(60,
+        assertEquals(40,
                 estimatedPrice
         );
     }
 
+    @Test
+    void shouldReturn20percentDiscount_ForPassengerOver70yo_And20percentIncreaseFor20daysBeforeDeparture() {
+        this.addPassenger(70, List.of());
+
+        double estimatedPrice = this.helperTicketEstimator(20);
+        assertEquals(100,
+                estimatedPrice
+        );
+    }
+
+
+
     /*
-    * ### Date du voyage
-    * On calcule la durée entre aujourd'hui et le départ et applique les modificateurs suivants :
-    *
-    * * 30 jours avant le voyage, on applique -20% de réduction.
     * * Puis on applique 2% d'augmentation par jour pendant 25 jours (donc de -18% à 29 jours jusqu'à +30% à 5 jours de la date de départ)
     * * À moins de 5 jours du voyage, le tarif du billet double.
-    *
-    * Ces règles ne s'appliquent pas sur les billets à prix fixe.
     */
 
     /*
