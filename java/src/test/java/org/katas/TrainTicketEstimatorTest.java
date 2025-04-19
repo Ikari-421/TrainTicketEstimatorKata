@@ -105,7 +105,7 @@ class TrainTicketEstimatorTest {
     }
 
     @Test
-    void shouldReturn20percentIncrease_ForAllOtherPassenger_AndOver30daysBeforeDeparture() {
+    void shouldReturn150percentIncrease_ForAllOtherPassenger_AndOver30daysBeforeDeparture() {
         this.addPassenger(40, List.of());
 
         double estimatedPrice = this.helperTicketEstimator(6);
@@ -188,27 +188,26 @@ class TrainTicketEstimatorTest {
     }
 
     @Test
-    void shouldReturn_ForDiscountCardCombined() {
+    void shouldReturn80_ForDiscountCardCombined_2SeniorPassengers() {
+        this.addPassenger(70, List.of(DiscountCard.Senior, DiscountCard.Couple));
         this.addPassenger(70, List.of(DiscountCard.Senior));
-        // 100 -20 = 80 -20 = 60
-        this.addPassenger(30, List.of(DiscountCard.Couple));
-        // 100 +20 = 120 -20 = 100
 
         double estimatedPrice = this.helperTicketEstimator(21);
-        assertEquals(160,
+        assertEquals(80,
                 estimatedPrice
         );
     }
 
-    /*
-    * Les cartes de réduction sont cumulables si elles sont compatibles (sauf `TrainStroke Staff`).
-    * Ainsi un couple de séniors a 40% de réduction sur ses billets (plus 20% parce qu'ils sont seniors...
-    * à ce prix c'est cadeau).
-    */
+    @Test
+    void shouldReturn140_ForDiscountCardCombined_NotSeniorTogether() {
+        this.addPassenger(70, List.of(DiscountCard.Senior,DiscountCard.Couple));
+        this.addPassenger(30, List.of());
 
-
-
-
+        double estimatedPrice = this.helperTicketEstimator(21);
+        assertEquals(140,
+                estimatedPrice
+        );
+    }
 
     /*
     * ## Nouvelles fonctionnalités
@@ -220,4 +219,5 @@ class TrainTicketEstimatorTest {
     * Pour cela, il faudra ajouter un champ `lastName` dans le passager. La carte ne s'applique pas si le nom n'est pas renseigné.
     * Cette carte est non cumulable avec les autres réductions. Comme elle est plus avantageuse que les autres, elle est prioritaire sur les autres cartes.
     */
+
 }
