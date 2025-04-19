@@ -1,22 +1,18 @@
 package org.katas;
 
-import org.json.JSONObject;
 import org.katas.model.DiscountCard;
 import org.katas.model.Passenger;
-import org.katas.model.TripRequest;
+import org.katas.model.TrainDetails;
 import org.katas.model.exceptions.ApiException;
 import org.katas.model.exceptions.InvalidTripInputException;
+import org.katas.service.ApiCallService;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.Date;
 import java.util.List;
 
 public class TrainTicketEstimator {
 
-    public double estimate(TripRequest trainDetails) {
+    public double estimate(TrainDetails trainDetails, IApiCall iApiCall) {
         if (trainDetails.passengers().isEmpty()) {
             return 0;
         }
@@ -34,7 +30,7 @@ public class TrainTicketEstimator {
         }
 
         // Extraction de l'appel d'API
-        double basePrice = getBasePrice(trainDetails);
+        double basePrice = iApiCall.getBasePrice(trainDetails);
 
 
         if (basePrice == -1) {
@@ -123,29 +119,5 @@ public class TrainTicketEstimator {
         }
 
         return total;
-    }
-
-    private static double getBasePrice(TripRequest trainDetails) {
-        // Start of Calling API
-        double basePrice = -1;
-        try {
-            String urlString = String.format("https://sncftrenitaliadb.com/api/train/estimate/price?from=%s&to=%s&date=%s", trainDetails.details().from(), trainDetails.details().to(), trainDetails.details().when());
-            URL url = new URL(urlString);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("GET");
-            BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            String inputLine;
-            StringBuffer content = new StringBuffer();
-            while ((inputLine = in.readLine()) != null) {
-                content.append(inputLine);
-            }
-            in.close();
-            conn.disconnect();
-            JSONObject obj = new JSONObject(content.toString());
-            basePrice = obj.has("price") ? obj.getDouble("price") : -1;
-        } catch (Exception e) {
-        }
-        // End of calling API
-        return basePrice;
     }
 }

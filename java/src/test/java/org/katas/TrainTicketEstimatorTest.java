@@ -3,11 +3,11 @@ package org.katas;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
-import org.katas.TrainTicketEstimator;
+
 import org.katas.model.DiscountCard;
 import org.katas.model.Passenger;
 import org.katas.model.TripDetails;
-import org.katas.model.TripRequest;
+import org.katas.model.TrainDetails;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -18,7 +18,14 @@ import java.util.List;
 
 class TrainTicketEstimatorTest {
 
-    public Date tripDate(int days) {
+    private List<Passenger> passengers = new ArrayList<>();
+
+    private void addPassenger(int age, List<DiscountCard> discountCards){
+        Passenger newPassenger = new Passenger(age, discountCards);
+        this.passengers.add(newPassenger);
+    }
+
+    private Date tripDate(int days) {
         return Date.from(
                 LocalDate.now()
                         .plusDays(days)
@@ -27,9 +34,17 @@ class TrainTicketEstimatorTest {
         );
     }
 
-    @Test
-    void should_NotWork() {
-        assertEquals(4, 2+2);
+    private double helperTicketEstimator(int withInDate) {
+        TrainTicketEstimator tte = new TrainTicketEstimator();
+        Date when = tripDate(withInDate);
+
+        TrainDetails trainDetails = new TrainDetails(new TripDetails("Bordeaux", "Paris", when), this.passengers);
+        System.out.println(this.passengers.toString());
+
+        // FakeApiCall renvoi toujours 100.00 pour simplifier les calculs et véfifications
+        FakeApiCall fakeApiCall = new FakeApiCall();
+
+        return tte.estimate(trainDetails, fakeApiCall);
     }
 
     /*
@@ -44,20 +59,15 @@ class TrainTicketEstimatorTest {
 
 
     @Test
-    void should_returnFloat() {
+    void shouldReturnFixedPriceAt9_For3yoChild() {
 
-        TrainTicketEstimator tte = new TrainTicketEstimator();
-        Passenger passenger1 = new Passenger(10, List.of(DiscountCard.HalfCouple));
-        List<Passenger> passengers = new ArrayList<>();
-        Date when = tripDate(20);
-        passengers.add(passenger1);
-        TripRequest tripRequest = new TripRequest(new TripDetails("Tokyo", "Paris", when), passengers);
+        this.addPassenger(3, List.of());
 
-        double estimatedPrice = tte.estimate(tripRequest);
-
-        assertEquals(4,
+        double estimatedPrice = this.helperTicketEstimator(40);
+        assertEquals(9,
                 estimatedPrice
                 );
+
     }
 
     /*
