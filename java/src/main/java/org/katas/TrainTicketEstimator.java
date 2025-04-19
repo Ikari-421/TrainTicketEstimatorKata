@@ -33,26 +33,8 @@ public class TrainTicketEstimator {
             throw new InvalidTripInputException("Date is invalid");
         }
 
-        // Start of Calling API
-        double basePrice = -1;
-        try {
-            String urlString = String.format("https://sncftrenitaliadb.com/api/train/estimate/price?from=%s&to=%s&date=%s", trainDetails.details().from(), trainDetails.details().to(), trainDetails.details().when());
-            URL url = new URL(urlString);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("GET");
-            BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            String inputLine;
-            StringBuffer content = new StringBuffer();
-            while ((inputLine = in.readLine()) != null) {
-                content.append(inputLine);
-            }
-            in.close();
-            conn.disconnect();
-            JSONObject obj = new JSONObject(content.toString());
-            basePrice = obj.has("price") ? obj.getDouble("price") : -1;
-        } catch (Exception e) {
-        }
-        // End of calling API
+        // Extraction de l'appel d'API
+        double basePrice = getBasePrice(trainDetails);
 
 
         if (basePrice == -1) {
@@ -141,5 +123,29 @@ public class TrainTicketEstimator {
         }
 
         return total;
+    }
+
+    private static double getBasePrice(TripRequest trainDetails) {
+        // Start of Calling API
+        double basePrice = -1;
+        try {
+            String urlString = String.format("https://sncftrenitaliadb.com/api/train/estimate/price?from=%s&to=%s&date=%s", trainDetails.details().from(), trainDetails.details().to(), trainDetails.details().when());
+            URL url = new URL(urlString);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            String inputLine;
+            StringBuffer content = new StringBuffer();
+            while ((inputLine = in.readLine()) != null) {
+                content.append(inputLine);
+            }
+            in.close();
+            conn.disconnect();
+            JSONObject obj = new JSONObject(content.toString());
+            basePrice = obj.has("price") ? obj.getDouble("price") : -1;
+        } catch (Exception e) {
+        }
+        // End of calling API
+        return basePrice;
     }
 }
