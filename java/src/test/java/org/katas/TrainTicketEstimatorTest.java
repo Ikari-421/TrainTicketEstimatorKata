@@ -71,10 +71,6 @@ class TrainTicketEstimatorTest {
     // TODO Demander au metier si c'est normal d'avoir un tarifs de 0 Si il n'y a pas de passager ???
     // TODO Devrait lever une exception pour dire qu'il n'y a pas de passagers
 
-    /*
-     * Dans tous les autres cas, c'est +20% (Hé quoi, il faut bien qu'on fasse du profit !)
-     */
-
     @Test
     void shouldReturn40percentDiscount_ForPassengerUnder18yo_AndOver30daysBeforeDeparture() {
         this.addPassenger(17, List.of());
@@ -85,15 +81,24 @@ class TrainTicketEstimatorTest {
         );
     }
 
-
-    // TODO Demander au PO pourquoi on a pas de d'augmentation du prix du billet on a 82 au lieu de 100
+    // TODO Demander au PO pourquoi à 29 jours du départ on à 16% de remise a lieu de 18%
     // Puis on applique 2% d'augmentation par jour pendant 25 jours (donc de -18% à 29 jours jusqu'à +30% à 5 jours de la date de départ)
     @Test
     void shouldReturn20percentDiscount_ForPassengerOver70yo_And20percentIncreaseFor20daysBeforeDeparture() {
         this.addPassenger(70, List.of());
 
-        double estimatedPrice = this.helperTicketEstimator(20);
-        assertEquals(82,
+        double estimatedPrice = this.helperTicketEstimator(29);
+        assertEquals(64,
+                estimatedPrice
+        );
+    }
+
+    @Test
+    void shouldReturn20percentDiscount_ForPassengerOver70yo_AndOver30daysBeforeDeparture20percentOff() {
+        this.addPassenger(70, List.of());
+
+        double estimatedPrice = this.helperTicketEstimator(40);
+        assertEquals(60,
                 estimatedPrice
         );
     }
@@ -102,18 +107,21 @@ class TrainTicketEstimatorTest {
     void shouldReturn20percentIncrease_ForAllOtherPassenger_AndOver30daysBeforeDeparture() {
         this.addPassenger(40, List.of());
 
-        double estimatedPrice = this.helperTicketEstimator(40);
-        assertEquals(100,
+        double estimatedPrice = this.helperTicketEstimator(6);
+        assertEquals(150,
                 estimatedPrice
         );
     }
 
+    @Test
+    void shouldDouble_ForAllOtherPassenger_AndUnder5daysBeforeDeparture() {
+        this.addPassenger(40, List.of());
 
-
-    /*
-    * * Puis on applique 2% d'augmentation par jour pendant 25 jours (donc de -18% à 29 jours jusqu'à +30% à 5 jours de la date de départ)
-    * * À moins de 5 jours du voyage, le tarif du billet double.
-    */
+        double estimatedPrice = this.helperTicketEstimator(5);
+        assertEquals(220,
+                estimatedPrice
+        );
+    }
 
     /*
     * ### Cartes de réduction
