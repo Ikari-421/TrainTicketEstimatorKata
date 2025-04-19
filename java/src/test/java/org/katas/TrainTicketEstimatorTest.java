@@ -85,11 +85,24 @@ class TrainTicketEstimatorTest {
         );
     }
 
+
+    // TODO Demander au PO pourquoi on a pas de d'augmentation du prix du billet on a 82 au lieu de 100
+    // Puis on applique 2% d'augmentation par jour pendant 25 jours (donc de -18% à 29 jours jusqu'à +30% à 5 jours de la date de départ)
     @Test
     void shouldReturn20percentDiscount_ForPassengerOver70yo_And20percentIncreaseFor20daysBeforeDeparture() {
         this.addPassenger(70, List.of());
 
         double estimatedPrice = this.helperTicketEstimator(20);
+        assertEquals(82,
+                estimatedPrice
+        );
+    }
+
+    @Test
+    void shouldReturn20percentIncrease_ForAllOtherPassenger_AndOver30daysBeforeDeparture() {
+        this.addPassenger(40, List.of());
+
+        double estimatedPrice = this.helperTicketEstimator(40);
         assertEquals(100,
                 estimatedPrice
         );
