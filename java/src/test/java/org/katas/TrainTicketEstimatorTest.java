@@ -8,6 +8,7 @@ import org.katas.model.DiscountCard;
 import org.katas.model.Passenger;
 import org.katas.model.TripDetails;
 import org.katas.model.TrainDetails;
+import org.katas.model.DiscountCard;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -123,17 +124,91 @@ class TrainTicketEstimatorTest {
         );
     }
 
+    @Test
+    void shouldReturn_1ForTicketPrice_ForTrainStrokeStaff() {
+        this.addPassenger(40, List.of(DiscountCard.TrainStroke));
+
+        double estimatedPrice = this.helperTicketEstimator(5);
+        assertEquals(1,
+                estimatedPrice
+        );
+    }
+
+    @Test
+    void shouldReturn60_For20percentDiscountForOver70yo_And20percentDiscountForSeniorDiscountCard() {
+        this.addPassenger(70, List.of(DiscountCard.Senior));
+
+        double estimatedPrice = this.helperTicketEstimator(21);
+        assertEquals(60,
+                estimatedPrice
+        );
+    }
+
+    @Test
+    void shouldReturn120_For1passengers_WithOneCoupleDiscountCard() {
+        this.addPassenger(18, List.of(DiscountCard.Couple));
+
+        double estimatedPrice = this.helperTicketEstimator(21);
+        assertEquals(120,
+                estimatedPrice
+        );
+    }
+
+
+    @Test
+    void shouldReturn200_For2passengers_With1CoupleDiscountCard() {
+        this.addPassenger(18, List.of(DiscountCard.Couple));
+        this.addPassenger(20, List.of());
+
+        double estimatedPrice = this.helperTicketEstimator(21);
+        assertEquals(200,
+                estimatedPrice
+        );
+    }
+
+    @Test
+    void shouldReturn200_For2passengers_With2CoupleDiscountCard() {
+        this.addPassenger(18, List.of(DiscountCard.Couple));
+        this.addPassenger(20, List.of(DiscountCard.Couple));
+
+        double estimatedPrice = this.helperTicketEstimator(21);
+        assertEquals(200,
+                estimatedPrice
+        );
+    }
+
+    @Test
+    void shouldReturn90_For1passengers_With2HalfCoupleDiscountCard() {
+        this.addPassenger(18, List.of(DiscountCard.HalfCouple));
+
+        double estimatedPrice = this.helperTicketEstimator(21);
+        assertEquals(110,
+                estimatedPrice
+        );
+    }
+
+    @Test
+    void shouldReturn_ForDiscountCardCombined() {
+        this.addPassenger(70, List.of(DiscountCard.Senior));
+        // 100 -20 = 80 -20 = 60
+        this.addPassenger(30, List.of(DiscountCard.Couple));
+        // 100 +20 = 120 -20 = 100
+
+        double estimatedPrice = this.helperTicketEstimator(21);
+        assertEquals(160,
+                estimatedPrice
+        );
+    }
+
     /*
-    * ### Cartes de réduction
-    *
-    * Les usagers peuvent posséder des cartes de réduction :
-    * * Carte `TrainStroke staff` : tous les billets sont à 1 euro
-    * * Carte `Senior` : valable uniquement si l'utilisateur a plus de 70 ans. 20% de réduction supplémentaire
-    * * Carte `Couple`: valable uniquement si le voyage concerne 2 passagers majeurs. 20% de réduction sur le billet de chacun de ces passagers. Valable une seule fois !
-    * * Carte `Mi-couple` : valable uniquement si le voyage concerne 1 passager majeur. 10% de réduction sur le voyage.
-    *
-    * Les cartes de réduction sont cumulables si elles sont compatibles (sauf `TrainStroke Staff`). Ainsi un couple de séniors a 40% de réduction sur ses billets (plus 20% parce qu'ils sont seniors... à ce prix c'est cadeau).
+    * Les cartes de réduction sont cumulables si elles sont compatibles (sauf `TrainStroke Staff`).
+    * Ainsi un couple de séniors a 40% de réduction sur ses billets (plus 20% parce qu'ils sont seniors...
+    * à ce prix c'est cadeau).
     */
+
+
+
+
 
     /*
     * ## Nouvelles fonctionnalités
