@@ -1,7 +1,6 @@
 package org.katas.service;
 
 import org.json.JSONObject;
-import org.katas.IApiCall;
 import org.katas.model.TrainDetails;
 import org.katas.exceptions.ApiException;
 

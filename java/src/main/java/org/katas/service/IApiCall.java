@@ -1,4 +1,4 @@
-package org.katas;
+package org.katas.service;
 
 import org.katas.model.TrainDetails;
 
