@@ -15,22 +15,17 @@ public class TrainTicketEstimator {
 
     public double estimate(TrainDetails trainDetails, IApiCall iApiCall) {
 
-        // Récupération des détails du train
-        TripDetails tripDetails = trainDetails.details();
         List<Passenger> passengers = trainDetails.passengers();
-
         if (passengers.isEmpty()) {
             return 0;
         }
 
-        // Test les détails et envoi une exception en cas de problème
+        TripDetails tripDetails = trainDetails.details();
+        double basePrice = iApiCall.getBasePrice(trainDetails);
+        double total = 0;
+
         ValidationService validationService = new ValidationService();
         validationService.validationDetails(tripDetails, passengers);
-
-        // Extraction de l'appel d'API
-        double basePrice = iApiCall.getBasePrice(trainDetails);
-
-        double total = 0;
 
         for (Passenger passenger : passengers) {
 
@@ -84,20 +79,17 @@ public class TrainTicketEstimator {
     private static double applyDateDiscount(TripDetails tripDetails, double calculedPrice, double basePrice) {
         Date currentDate = new Date();
         long tripDatetime = tripDetails.when().getTime();
+        long timeDiff = tripDatetime - currentDate.getTime();
+        var diffDays = ((int)((tripDatetime / (24 * 60 * 60 * 1000)) - (int)(currentDate.getTime() / (24 * 60 * 60 * 1000))));
 
-        currentDate.setDate(currentDate.getDate() +30);
-        if (tripDatetime >= currentDate.getTime() ) {
+        if(diffDays >= 30 || timeDiff <= (6 * 60 * 60 * 1000)) {
             calculedPrice -= basePrice * 0.2;
+        }else if(diffDays >= 5) {
+            calculedPrice += (20 - diffDays) * 0.02 * basePrice;
         } else {
-            currentDate.setDate(currentDate.getDate() -25);
-            if (tripDatetime > currentDate.getTime()) {
-                currentDate.setDate(currentDate.getDate() - 5);
-                var diffDays = ((int)((tripDatetime /(24*60*60*1000)) - (int)(currentDate.getTime()/(24*60*60*1000))));
-                calculedPrice += (20 - diffDays) * 0.02 * basePrice;
-            } else {
-                calculedPrice += basePrice;
-            }
+            calculedPrice += basePrice;
         }
+
         return calculedPrice;
     }
 }

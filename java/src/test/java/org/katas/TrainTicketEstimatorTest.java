@@ -11,7 +11,7 @@ import org.katas.model.TripDetails;
 import org.katas.model.TrainDetails;
 import org.katas.model.DiscountCard;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 
 import java.util.ArrayList;
@@ -29,9 +29,9 @@ class TrainTicketEstimatorTest {
 
     private Date tripDate(int days) {
         return Date.from(
-                LocalDate.now()
+                LocalDateTime.now()
                         .plusDays(days)
-                        .atStartOfDay(ZoneId.systemDefault())
+                        .atZone(ZoneId.systemDefault())
                         .toInstant()
         );
     }
@@ -86,11 +86,11 @@ class TrainTicketEstimatorTest {
     // TODO Demander au PO pourquoi à 29 jours du départ on à 16% de remise a lieu de 18%
     // Puis on applique 2% d'augmentation par jour pendant 25 jours (donc de -18% à 29 jours jusqu'à +30% à 5 jours de la date de départ)
     @Test
-    void shouldReturn62_Over70yoMinus20_And29daysBeforeDepartureMinus18() {
+    void shouldReturn62_Over70yoMinus20_An29daysBeforeDepartureMinus18() {
         this.addPassenger(70, List.of());
 
         double estimatedPrice = this.helperTicketEstimator("Bordeaux", "Paris", 29);
-        assertEquals(64,
+        assertEquals(62,
                 estimatedPrice
         );
     }
@@ -109,7 +109,7 @@ class TrainTicketEstimatorTest {
     void shouldReturn150_ForAllOtherPassengerPlus20_AndOver5daysBeforeDeparturePlus30() {
         this.addPassenger(40, List.of());
 
-        double estimatedPrice = this.helperTicketEstimator("Bordeaux", "Paris", 6);
+        double estimatedPrice = this.helperTicketEstimator("Bordeaux", "Paris", 5);
         assertEquals(150,
                 estimatedPrice
         );
@@ -119,7 +119,7 @@ class TrainTicketEstimatorTest {
     void shouldReturn220_ForAllOtherPassengerPlus20_AndUnder5daysBeforeDepartureDouble100() {
         this.addPassenger(40, List.of());
 
-        double estimatedPrice = this.helperTicketEstimator("Bordeaux", "Paris", 5);
+        double estimatedPrice = this.helperTicketEstimator("Bordeaux", "Paris", 4);
         assertEquals(220,
                 estimatedPrice
         );
@@ -139,7 +139,7 @@ class TrainTicketEstimatorTest {
     void shouldReturn60_Over70yoMinus20_SeniorDiscountCardOwnerMinus20() {
         this.addPassenger(70, List.of(DiscountCard.Senior));
 
-        double estimatedPrice = this.helperTicketEstimator("Bordeaux", "Paris", 21);
+        double estimatedPrice = this.helperTicketEstimator("Bordeaux", "Paris", 20);
         assertEquals(60,
                 estimatedPrice
         );
@@ -149,7 +149,7 @@ class TrainTicketEstimatorTest {
     void shouldReturn120_AlonePassengersPlus20_CoupleDiscountCardOwnerNoDiscount() {
         this.addPassenger(18, List.of(DiscountCard.Couple));
 
-        double estimatedPrice = this.helperTicketEstimator("Bordeaux", "Paris", 21);
+        double estimatedPrice = this.helperTicketEstimator("Bordeaux", "Paris", 20);
         assertEquals(120,
                 estimatedPrice
         );
@@ -161,7 +161,7 @@ class TrainTicketEstimatorTest {
         this.addPassenger(18, List.of(DiscountCard.Couple));
         this.addPassenger(20, List.of());
 
-        double estimatedPrice = this.helperTicketEstimator("Bordeaux", "Paris", 21);
+        double estimatedPrice = this.helperTicketEstimator("Bordeaux", "Paris", 20);
         assertEquals(200,
                 estimatedPrice
         );
@@ -172,7 +172,7 @@ class TrainTicketEstimatorTest {
         this.addPassenger(18, List.of(DiscountCard.Couple));
         this.addPassenger(20, List.of(DiscountCard.Couple));
 
-        double estimatedPrice = this.helperTicketEstimator("Bordeaux", "Paris", 21);
+        double estimatedPrice = this.helperTicketEstimator("Bordeaux", "Paris", 20);
         assertEquals(200,
                 estimatedPrice
         );
@@ -182,7 +182,7 @@ class TrainTicketEstimatorTest {
     void shouldReturn110_ForAllOtherPassengerPlus20_HalfCoupleDiscountCardOwnerMinus10() {
         this.addPassenger(18, List.of(DiscountCard.HalfCouple));
 
-        double estimatedPrice = this.helperTicketEstimator("Bordeaux", "Paris", 21);
+        double estimatedPrice = this.helperTicketEstimator("Bordeaux", "Paris", 20);
         assertEquals(110,
                 estimatedPrice
         );
@@ -193,7 +193,7 @@ class TrainTicketEstimatorTest {
         this.addPassenger(70, List.of(DiscountCard.Senior, DiscountCard.Couple));
         this.addPassenger(70, List.of(DiscountCard.Senior));
 
-        double estimatedPrice = this.helperTicketEstimator("Bordeaux", "Paris", 21);
+        double estimatedPrice = this.helperTicketEstimator("Bordeaux", "Paris", 20);
         assertEquals(80,
                 estimatedPrice
         );
@@ -204,13 +204,30 @@ class TrainTicketEstimatorTest {
         this.addPassenger(70, List.of(DiscountCard.Senior,DiscountCard.Couple));
         this.addPassenger(30, List.of());
 
-        double estimatedPrice = this.helperTicketEstimator("Bordeaux", "Paris", 21);
+        double estimatedPrice = this.helperTicketEstimator("Bordeaux", "Paris", 20);
         assertEquals(140,
                 estimatedPrice
         );
     }
 
     // TODO TESTS EXPLORATOIRE
+
+    @Test
+    void shouldApply20percentDiscount_WhenLessThan6HoursBeforeDeparture() {
+        this.passengers.clear();
+        this.passengers.add(new Passenger(30, List.of()));
+
+        // simulate date in 5h from now
+        Date inFiveHours = new Date(System.currentTimeMillis() + 6 * 60 * 60 * 1000);
+
+        TrainTicketEstimator estimator = new TrainTicketEstimator();
+        TrainDetails td = new TrainDetails(new TripDetails("Lyon", "Paris", inFiveHours), this.passengers);
+        FakeApiCall api = new FakeApiCall();
+
+        double price = estimator.estimate(td, api);
+
+        assertEquals(100.0, price);
+    }
 
 
     // TODO TESTER LES EXCEPTIONS
