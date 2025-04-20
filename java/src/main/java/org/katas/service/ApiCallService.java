@@ -3,6 +3,7 @@ package org.katas.service;
 import org.json.JSONObject;
 import org.katas.IApiCall;
 import org.katas.model.TrainDetails;
+import org.katas.exceptions.ApiException;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -13,7 +14,7 @@ public class ApiCallService implements IApiCall {
 
     @Override
     public double getBasePrice(TrainDetails trainDetails) {
-        // Start of Calling API
+
         double basePrice = -1;
         try {
             String urlString = String.format("https://sncftrenitaliadb.com/api/train/estimate/price?from=%s&to=%s&date=%s", trainDetails.details().from(), trainDetails.details().to(), trainDetails.details().when());
@@ -32,7 +33,11 @@ public class ApiCallService implements IApiCall {
             basePrice = obj.has("price") ? obj.getDouble("price") : -1;
         } catch (Exception e) {
         }
-        // End of calling API
+
+        if (basePrice == -1) {
+            throw new ApiException();
+        }
+
         return basePrice;
     }
 
