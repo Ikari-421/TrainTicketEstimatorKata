@@ -1,9 +1,9 @@
-package org.katas.service;
+package org.katas.service.impl;
 
 import org.json.JSONObject;
-import org.katas.IApiCall;
 import org.katas.model.TrainDetails;
 import org.katas.exceptions.ApiException;
+import org.katas.service.IApiCall;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;

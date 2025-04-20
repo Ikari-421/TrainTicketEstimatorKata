@@ -1,8 +1,9 @@
 package org.katas;
 
+import org.katas.service.IApiCall;
 import org.katas.model.TrainDetails;
 
-public class FakeApiCall implements IApiCall{
+public class FakeApiCall implements IApiCall {
 
     @Override
     public double getBasePrice(TrainDetails trainDetails) {
