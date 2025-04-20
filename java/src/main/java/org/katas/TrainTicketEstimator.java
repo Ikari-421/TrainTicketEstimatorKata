@@ -1,15 +1,15 @@
 package org.katas;
 
-import org.katas.model.*;
-import org.katas.service.ExceptionService;
-import org.katas.service.IApiCall;
+import org.katas.model.DiscountCard;
+import org.katas.model.Passenger;
+import org.katas.model.TrainDetails;
+import org.katas.model.TripDetails;
+import org.katas.exceptions.InvalidTripInputException;
 
 import java.util.Date;
 import java.util.List;
 
 public class TrainTicketEstimator {
-    private double basePrice;
-    private double calculedPrice;
 
     public double estimate(TrainDetails trainDetails, IApiCall iApiCall) {
 
@@ -17,14 +17,17 @@ public class TrainTicketEstimator {
         TripDetails tripDetails = trainDetails.details();
         List<Passenger> passengers = trainDetails.passengers();
 
-        // Gestion des exceptions
-        ExceptionService.throwException(passengers, tripDetails);
+        if (passengers.isEmpty()) {
+            return 0;
+        }
+
+        validationDetails(tripDetails, passengers);
 
         // Extraction de l'appel d'API
-        basePrice = iApiCall.getBasePrice(trainDetails);
+        double basePrice = iApiCall.getBasePrice(trainDetails);
 
         double total = 0;
-        calculedPrice = basePrice;
+        double calculedPrice = basePrice;
 
         for (Passenger passenger : passengers) {
 
@@ -106,4 +109,21 @@ public class TrainTicketEstimator {
         return total;
     }
 
+    private void validationDetails(TripDetails tripDetails, List<Passenger> passengers) {
+        if (tripDetails.from().trim().isEmpty()) {
+            throw new InvalidTripInputException("Start city is invalid");
+        }
+
+        if (tripDetails.to().trim().isEmpty()) {
+            throw new InvalidTripInputException("Destination city is invalid");
+        }
+
+        if (tripDetails.when().before(new Date())) {
+            throw new InvalidTripInputException("Date is invalid");
+        }
+
+        if (passengers.stream().anyMatch(p -> p.age() < 0)){
+            throw new InvalidTripInputException("Age is invalid");
+        }
+    }
 }

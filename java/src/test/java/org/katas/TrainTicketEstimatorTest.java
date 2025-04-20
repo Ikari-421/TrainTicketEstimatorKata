@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import org.katas.exceptions.InvalidTripInputException;
 import org.katas.model.DiscountCard;
 import org.katas.model.Passenger;
 import org.katas.model.TripDetails;
@@ -35,11 +36,11 @@ class TrainTicketEstimatorTest {
         );
     }
 
-    private double helperTicketEstimator(int withInDate) {
+    private double helperTicketEstimator( String from, String to, int withInDate) {
         TrainTicketEstimator tte = new TrainTicketEstimator();
         Date when = tripDate(withInDate);
 
-        TrainDetails trainDetails = new TrainDetails(new TripDetails("Bordeaux", "Paris", when), this.passengers);
+        TrainDetails trainDetails = new TrainDetails(new TripDetails(from, to, when), this.passengers);
         //System.out.println(this.passengers.toString());
 
         // FakeApiCall renvoi toujours 100.00 pour simplifier les calculs et véfifications
@@ -52,7 +53,7 @@ class TrainTicketEstimatorTest {
     void shouldReturn0_ChildUnder1yo() {
         this.addPassenger(0, List.of());
 
-        double estimatedPrice = this.helperTicketEstimator(40);
+        double estimatedPrice = this.helperTicketEstimator("Bordeaux", "Paris", 40);
         // TODO Voir pourquoi on à -20.0 au lieu de 0 dans cette condition
         assertEquals(-20.0,
                 estimatedPrice
@@ -63,7 +64,7 @@ class TrainTicketEstimatorTest {
     void shouldReturnFixedPriceAt9_For3yoChild() {
         this.addPassenger(3, List.of());
 
-        double estimatedPrice = this.helperTicketEstimator(40);
+        double estimatedPrice = this.helperTicketEstimator("Bordeaux", "Paris", 40);
         assertEquals(9,
                 estimatedPrice
                 );
@@ -76,7 +77,7 @@ class TrainTicketEstimatorTest {
     void shouldReturn40_Under18yoMinus40_AndOver30daysBeforeDepartureMinus20() {
         this.addPassenger(17, List.of());
 
-        double estimatedPrice = this.helperTicketEstimator(40);
+        double estimatedPrice = this.helperTicketEstimator("Bordeaux", "Paris", 40);
         assertEquals(40,
                 estimatedPrice
         );
@@ -88,7 +89,7 @@ class TrainTicketEstimatorTest {
     void shouldReturn62_Over70yoMinus20_And29daysBeforeDepartureMinus18() {
         this.addPassenger(70, List.of());
 
-        double estimatedPrice = this.helperTicketEstimator(29);
+        double estimatedPrice = this.helperTicketEstimator("Bordeaux", "Paris", 29);
         assertEquals(64,
                 estimatedPrice
         );
@@ -98,7 +99,7 @@ class TrainTicketEstimatorTest {
     void shouldReturn60_Over70yoMinus20_AndOver30daysBeforeDepartureMinus20() {
         this.addPassenger(70, List.of());
 
-        double estimatedPrice = this.helperTicketEstimator(40);
+        double estimatedPrice = this.helperTicketEstimator("Bordeaux", "Paris", 40);
         assertEquals(60,
                 estimatedPrice
         );
@@ -108,7 +109,7 @@ class TrainTicketEstimatorTest {
     void shouldReturn150_ForAllOtherPassengerPlus20_AndOver5daysBeforeDeparturePlus30() {
         this.addPassenger(40, List.of());
 
-        double estimatedPrice = this.helperTicketEstimator(6);
+        double estimatedPrice = this.helperTicketEstimator("Bordeaux", "Paris", 6);
         assertEquals(150,
                 estimatedPrice
         );
@@ -118,7 +119,7 @@ class TrainTicketEstimatorTest {
     void shouldReturn220_ForAllOtherPassengerPlus20_AndUnder5daysBeforeDepartureDouble100() {
         this.addPassenger(40, List.of());
 
-        double estimatedPrice = this.helperTicketEstimator(5);
+        double estimatedPrice = this.helperTicketEstimator("Bordeaux", "Paris", 5);
         assertEquals(220,
                 estimatedPrice
         );
@@ -128,7 +129,7 @@ class TrainTicketEstimatorTest {
     void shouldReturn1_TrainStrokeStaffCardOwner() {
         this.addPassenger(40, List.of(DiscountCard.TrainStroke));
 
-        double estimatedPrice = this.helperTicketEstimator(5);
+        double estimatedPrice = this.helperTicketEstimator("Bordeaux", "Paris", 5);
         assertEquals(1,
                 estimatedPrice
         );
@@ -138,7 +139,7 @@ class TrainTicketEstimatorTest {
     void shouldReturn60_Over70yoMinus20_SeniorDiscountCardOwnerMinus20() {
         this.addPassenger(70, List.of(DiscountCard.Senior));
 
-        double estimatedPrice = this.helperTicketEstimator(21);
+        double estimatedPrice = this.helperTicketEstimator("Bordeaux", "Paris", 21);
         assertEquals(60,
                 estimatedPrice
         );
@@ -148,7 +149,7 @@ class TrainTicketEstimatorTest {
     void shouldReturn120_AlonePassengersPlus20_CoupleDiscountCardOwnerNoDiscount() {
         this.addPassenger(18, List.of(DiscountCard.Couple));
 
-        double estimatedPrice = this.helperTicketEstimator(21);
+        double estimatedPrice = this.helperTicketEstimator("Bordeaux", "Paris", 21);
         assertEquals(120,
                 estimatedPrice
         );
@@ -160,7 +161,7 @@ class TrainTicketEstimatorTest {
         this.addPassenger(18, List.of(DiscountCard.Couple));
         this.addPassenger(20, List.of());
 
-        double estimatedPrice = this.helperTicketEstimator(21);
+        double estimatedPrice = this.helperTicketEstimator("Bordeaux", "Paris", 21);
         assertEquals(200,
                 estimatedPrice
         );
@@ -171,7 +172,7 @@ class TrainTicketEstimatorTest {
         this.addPassenger(18, List.of(DiscountCard.Couple));
         this.addPassenger(20, List.of(DiscountCard.Couple));
 
-        double estimatedPrice = this.helperTicketEstimator(21);
+        double estimatedPrice = this.helperTicketEstimator("Bordeaux", "Paris", 21);
         assertEquals(200,
                 estimatedPrice
         );
@@ -181,7 +182,7 @@ class TrainTicketEstimatorTest {
     void shouldReturn110_ForAllOtherPassengerPlus20_HalfCoupleDiscountCardOwnerMinus10() {
         this.addPassenger(18, List.of(DiscountCard.HalfCouple));
 
-        double estimatedPrice = this.helperTicketEstimator(21);
+        double estimatedPrice = this.helperTicketEstimator("Bordeaux", "Paris", 21);
         assertEquals(110,
                 estimatedPrice
         );
@@ -192,7 +193,7 @@ class TrainTicketEstimatorTest {
         this.addPassenger(70, List.of(DiscountCard.Senior, DiscountCard.Couple));
         this.addPassenger(70, List.of(DiscountCard.Senior));
 
-        double estimatedPrice = this.helperTicketEstimator(21);
+        double estimatedPrice = this.helperTicketEstimator("Bordeaux", "Paris", 21);
         assertEquals(80,
                 estimatedPrice
         );
@@ -203,7 +204,7 @@ class TrainTicketEstimatorTest {
         this.addPassenger(70, List.of(DiscountCard.Senior,DiscountCard.Couple));
         this.addPassenger(30, List.of());
 
-        double estimatedPrice = this.helperTicketEstimator(21);
+        double estimatedPrice = this.helperTicketEstimator("Bordeaux", "Paris", 21);
         assertEquals(140,
                 estimatedPrice
         );
@@ -211,7 +212,48 @@ class TrainTicketEstimatorTest {
 
     // TODO TESTS EXPLORATOIRE
 
+
     // TODO TESTER LES EXCEPTIONS
+    @Test
+    void shouldThrowException_WhenFromDestinationEmpty() {
+        this.addPassenger(30, List.of());
+
+        Exception exception = assertThrows(InvalidTripInputException.class, () -> {
+            this.helperTicketEstimator("", "Paris", 21);
+        });
+
+        assert exception.getMessage().contains("Start city is invalid");
+    }
+    @Test
+    void shouldThrowException_WhenToDestinationEmpty() {
+        this.addPassenger(30, List.of());
+
+        Exception exception = assertThrows(InvalidTripInputException.class, () -> {
+            this.helperTicketEstimator("Bordeaux", "", 21);
+        });
+
+        assert exception.getMessage().contains("Destination city is invalid");
+    }
+    @Test
+    void shouldThrowException_WhenAgeIsInvalid() {
+        this.addPassenger(-30, List.of());
+
+        Exception exception = assertThrows(InvalidTripInputException.class, () -> {
+            this.helperTicketEstimator("Bordeaux", "Paris", 21);
+        });
+
+        assert exception.getMessage().contains("Age is invalid");
+    }
+    @Test
+    void shouldThrowException_WhenDateIsInvalid() {
+        this.addPassenger(30, List.of());
+
+        Exception exception = assertThrows(InvalidTripInputException.class, () -> {
+            this.helperTicketEstimator("Bordeaux", "Paris", -21);
+        });
+
+        assert exception.getMessage().contains("Date is invalid");
+    }
 
     /*
     * ## Nouvelles fonctionnalités
