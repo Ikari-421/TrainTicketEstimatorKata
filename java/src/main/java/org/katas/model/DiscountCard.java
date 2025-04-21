@@ -5,7 +5,8 @@ public enum DiscountCard
     Senior("Senior"),
     TrainStroke("TrainStroke"),
     Couple("Couple"),
-    HalfCouple("HalfCouple");
+    HalfCouple("HalfCouple"),
+    Family("Family");
 
     private final String card;
 

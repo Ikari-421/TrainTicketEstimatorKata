@@ -70,9 +70,6 @@ class TrainTicketEstimatorTest {
                 );
     }
 
-    // TODO Demander au metier si c'est normal d'avoir un tarifs de 0 Si il n'y a pas de passager ???
-    // TODO Devrait lever une exception pour dire qu'il n'y a pas de passagers
-
     @Test
     void shouldReturn40_Under18yoMinus40_AndOver30daysBeforeDepartureMinus20() {
         this.addPassenger(17, List.of());
@@ -83,8 +80,6 @@ class TrainTicketEstimatorTest {
         );
     }
 
-    // TODO Demander au PO pourquoi à 29 jours du départ on à 16% de remise a lieu de 18%
-    // Puis on applique 2% d'augmentation par jour pendant 25 jours (donc de -18% à 29 jours jusqu'à +30% à 5 jours de la date de départ)
     @Test
     void shouldReturn62_Over70yoMinus20_An29daysBeforeDepartureMinus18() {
         this.addPassenger(70, List.of());
@@ -275,20 +270,34 @@ class TrainTicketEstimatorTest {
     /*
     * ## Nouvelles fonctionnalités
     *
-    * Deux nouvelles fonctionnalités sont nécessaires pour notre outil :
-    *
-    * * On s'est rendu compte qu'il restait parfois des billets à écouler juste avant le départ du train, et qu'un siège vide est moins rentable qu'un siège vendu pas cher.
-    * Par conséquent, 6 heures avant le départ, on applique une réduction de 20% sur le prix du billet (au lieu de doubler le prix du billet comme actuellement)
-    *
-    * TODO 6 heures avant départ retirer DOUBLE prix et faire 20% sur prix de base
-    *
     * * La carte Famille est un nouveau concept qui nous a été demandé et fonctionne comme suit.
     * Si un passager la possède, tous ceux qui ont le même nom de famille bénéficie de 30% de réduction.
     * Pour cela, il faudra ajouter un champ `lastName` dans le passager. La carte ne s'applique pas si le nom n'est pas renseigné.
     * Cette carte est non cumulable avec les autres réductions. Comme elle est plus avantageuse que les autres, elle est prioritaire sur les autres cartes.
     *
-    *
-    *
     */
+
+    // TODO Test Future fonctionnalité Carte Famille
+
+    @Test
+    void shouldReturn120_WhenFamillyCardOwner_AndAlonePassenger() {
+        this.addPassenger(40, List.of(DiscountCard.Family));
+
+        double estimatedPrice = this.helperTicketEstimator("Bordeaux", "Paris", 20);
+        assertEquals(120,
+                estimatedPrice
+        );
+    }
+
+    @Test
+    void shouldReturn140_WhenFamillyCardOwner_And2PassengerWithSameLastName() {
+        this.addPassenger(40, List.of(DiscountCard.Family));
+        this.addPassenger(40, List.of());
+
+        double estimatedPrice = this.helperTicketEstimator("Bordeaux", "Paris", 20);
+        assertEquals(140,
+                estimatedPrice
+        );
+    }
 
 }

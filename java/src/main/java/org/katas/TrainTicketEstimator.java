@@ -78,9 +78,8 @@ public class TrainTicketEstimator {
 
     private static double applyDateDiscount(TripDetails tripDetails, double calculedPrice, double basePrice) {
         Date currentDate = new Date();
-        long tripDatetime = tripDetails.when().getTime();
-        long timeDiff = tripDatetime - currentDate.getTime();
-        var diffDays = ((int)((tripDatetime / (24 * 60 * 60 * 1000)) - (int)(currentDate.getTime() / (24 * 60 * 60 * 1000))));
+        long timeDiff = tripDetails.when().getTime() - currentDate.getTime();
+        var diffDays = ((int)((tripDetails.when().getTime() / (24 * 60 * 60 * 1000)) - (int)(currentDate.getTime() / (24 * 60 * 60 * 1000))));
 
         if(diffDays >= 30 || timeDiff <= (6 * 60 * 60 * 1000)) {
             calculedPrice -= basePrice * 0.2;
