@@ -38,6 +38,7 @@ public class TrainTicketEstimator {
                 calculedPrice = 9;
             }
 
+
             if (passenger.discounts().contains(DiscountCard.Senior)) {
                 calculedPrice = DiscountCard.Senior.applyDiscount(calculedPrice, basePrice);
             }
@@ -47,23 +48,29 @@ public class TrainTicketEstimator {
             }
 
             total += calculedPrice;
+
+            // TODO Trouver le nom du porteur de la carte Family et comparer avec les autres nom
+            // Dès qu'un nom et trouvé, comparer avec tous les autres nom et voir si une personne possède la carte
+            // Mais le porteur de la carte n'a pas de remise sauf si il a une autre carte de remise
+            // Puis faire remise 30%
+            if( !passenger.lastName().isEmpty() ){
+
+                System.out.println(" LastName => " + passenger.lastName());
+            }
         }
 
         boolean hasMinor = passengers.stream().anyMatch(p -> p.age() < 18);
 
         if (!hasMinor) {
             if (passengers.size() == 2 && passengers.stream().anyMatch(p -> p.discounts().contains(DiscountCard.Couple))) {
-
-                total -= basePrice * 0.2 * 2;
+                total = DiscountCard.Couple.applyDiscount(total, basePrice);
             } else if (passengers.size() == 1 && passengers.stream().anyMatch(p -> p.discounts().contains(DiscountCard.HalfCouple))) {
-                total -= basePrice * 0.1;
+                total = DiscountCard.HalfCouple.applyDiscount(total, basePrice);
             }
         }
 
         return total;
     }
-
-
 
     private double applyAgeDiscount(Passenger passenger, double calculedPrice, double basePrice) {
         if (passenger.age() < 1) {

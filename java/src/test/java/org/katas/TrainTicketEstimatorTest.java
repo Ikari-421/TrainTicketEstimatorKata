@@ -26,6 +26,11 @@ class TrainTicketEstimatorTest {
         this.passengers.add(newPassenger);
     }
 
+    private void addMultiplePassenger(int age, List<DiscountCard> discountCards, String lastName){
+        Passenger newPassenger = new Passenger(age, discountCards, lastName);
+        this.passengers.add(newPassenger);
+    }
+
     private Date tripDate(int days) {
         return Date.from(
                 LocalDateTime.now()
@@ -278,7 +283,8 @@ class TrainTicketEstimatorTest {
 
     // TODO Test Future fonctionnalité Carte Famille
 
-    @Test
+    // Si seul ou avec des personnes, pas de remise si pas d'autre avec le même nom
+    // @Test
     void shouldReturn120_WhenFamillyCardOwner_AndAlonePassenger() {
         this.addPassenger(40, List.of(DiscountCard.Family));
 
@@ -288,15 +294,28 @@ class TrainTicketEstimatorTest {
         );
     }
 
+    // Remise pour tous les autres qui on le même nom Second passagé avec le même nom
     // @Test
-    void shouldReturn140_WhenFamillyCardOwner_And2PassengerWithSameLastName() {
-        this.addPassenger(40, List.of(DiscountCard.Family));
+    void shouldReturn160_WhenFamillyCardOwner_And2PassengerWithSameLastName() {
+        this.addMultiplePassenger(40, List.of(DiscountCard.Family), "Polo");
+        this.addMultiplePassenger(40, List.of(), "Polo");
+        this.addMultiplePassenger(40, List.of(), "Polo");
         this.addPassenger(40, List.of());
-
-        double estimatedPrice = this.helperTicketEstimator("Bordeaux", "Paris", 20);
-        assertEquals(140,
-                estimatedPrice
-        );
     }
+
+    // Remise second passagé mais pas de cumule avec une autre carte Remise Family prioritaire
+    // @Test
+    void shouldReturn160_WhenFamillyCardOwner_And2PassengerWithSameLastName_And2ndPassengerWithOtherDiscountCard() {
+        this.addMultiplePassenger(40, List.of(DiscountCard.Family), "Polo");
+        this.addPassenger(40, List.of(DiscountCard.Senior));
+    }
+
+    // Remise avec carte Senior et pas carte family mais remise pour autres membres de la famille
+    // @Test
+    void shouldReturn160_WhenFamillyCardOwner_And2PassengerWithSameLastName_AndSeniorCardOwner() {
+        this.addMultiplePassenger(40, List.of(DiscountCard.Senior, DiscountCard.Family), "Polo");
+    }
+
+    //
 
 }

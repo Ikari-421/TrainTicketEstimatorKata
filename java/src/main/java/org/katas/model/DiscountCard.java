@@ -31,7 +31,7 @@ public enum DiscountCard
     Family("Family") {
         @Override
         public double applyDiscount(double calculedPrice, double basePrice) {
-            return 0;
+            return  calculedPrice - basePrice * 0.3;
         }
     };
 
