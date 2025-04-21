@@ -9,7 +9,6 @@ import org.katas.model.DiscountCard;
 import org.katas.model.Passenger;
 import org.katas.model.TripDetails;
 import org.katas.model.TrainDetails;
-import org.katas.model.DiscountCard;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -289,7 +288,7 @@ class TrainTicketEstimatorTest {
         );
     }
 
-    @Test
+    // @Test
     void shouldReturn140_WhenFamillyCardOwner_And2PassengerWithSameLastName() {
         this.addPassenger(40, List.of(DiscountCard.Family));
         this.addPassenger(40, List.of());

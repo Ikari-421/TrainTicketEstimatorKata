@@ -4,7 +4,6 @@ import org.katas.model.DiscountCard;
 import org.katas.model.Passenger;
 import org.katas.model.TrainDetails;
 import org.katas.model.TripDetails;
-import org.katas.exceptions.InvalidTripInputException;
 import org.katas.service.ValidationService;
 import org.katas.service.IApiCall;
 
@@ -40,11 +39,11 @@ public class TrainTicketEstimator {
             }
 
             if (passenger.discounts().contains(DiscountCard.Senior)) {
-                calculedPrice -= basePrice * 0.2;
+                calculedPrice = DiscountCard.Senior.applyDiscount(calculedPrice, basePrice);
             }
 
             if (passenger.discounts().contains(DiscountCard.TrainStroke)) {
-                calculedPrice = 1;
+                calculedPrice = DiscountCard.TrainStroke.applyDiscount(calculedPrice, basePrice);
             }
 
             total += calculedPrice;
@@ -54,6 +53,7 @@ public class TrainTicketEstimator {
 
         if (!hasMinor) {
             if (passengers.size() == 2 && passengers.stream().anyMatch(p -> p.discounts().contains(DiscountCard.Couple))) {
+
                 total -= basePrice * 0.2 * 2;
             } else if (passengers.size() == 1 && passengers.stream().anyMatch(p -> p.discounts().contains(DiscountCard.HalfCouple))) {
                 total -= basePrice * 0.1;
@@ -63,7 +63,9 @@ public class TrainTicketEstimator {
         return total;
     }
 
-    private static double applyAgeDiscount(Passenger passenger, double calculedPrice, double basePrice) {
+
+
+    private double applyAgeDiscount(Passenger passenger, double calculedPrice, double basePrice) {
         if (passenger.age() < 1) {
             calculedPrice = 0;
         } else if (passenger.age() <= 17) {
@@ -76,7 +78,7 @@ public class TrainTicketEstimator {
         return calculedPrice;
     }
 
-    private static double applyDateDiscount(TripDetails tripDetails, double calculedPrice, double basePrice) {
+    private double applyDateDiscount(TripDetails tripDetails, double calculedPrice, double basePrice) {
         Date currentDate = new Date();
         long timeDiff = tripDetails.when().getTime() - currentDate.getTime();
         var diffDays = ((int)((tripDetails.when().getTime() / (24 * 60 * 60 * 1000)) - (int)(currentDate.getTime() / (24 * 60 * 60 * 1000))));
