@@ -19,7 +19,7 @@ public enum DiscountCard
     Couple("Couple") {
         @Override
         public double applyDiscount(double calculedPrice, double basePrice) {
-            return  calculedPrice - basePrice * 0.2 * 2;
+            return  calculedPrice - basePrice * 0.2;
         }
     },
     HalfCouple("HalfCouple") {

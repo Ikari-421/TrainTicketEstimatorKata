@@ -284,38 +284,40 @@ class TrainTicketEstimatorTest {
     // TODO Test Future fonctionnalité Carte Famille
 
     // Si seul ou avec des personnes, pas de remise si pas d'autre avec le même nom
-    // @Test
+    @Test
     void shouldReturn120_WhenFamillyCardOwner_AndAlonePassenger() {
-        this.addPassenger(40, List.of(DiscountCard.Family));
+        this.addPassenger(40, List.of(DiscountCard.Family, DiscountCard.Senior));
 
         double estimatedPrice = this.helperTicketEstimator("Bordeaux", "Paris", 20);
-        assertEquals(120,
+        assertEquals(90,
                 estimatedPrice
         );
     }
 
     // Remise pour tous les autres qui on le même nom Second passagé avec le même nom
-    // @Test
+    @Test
     void shouldReturn160_WhenFamillyCardOwner_And2PassengerWithSameLastName() {
         this.addMultiplePassenger(40, List.of(DiscountCard.Family), "Polo");
+        this.addMultiplePassenger(40, List.of(DiscountCard.Couple,DiscountCard.Senior), "Polo");
         this.addMultiplePassenger(40, List.of(), "Polo");
-        this.addMultiplePassenger(40, List.of(), "Polo");
-        this.addPassenger(40, List.of());
+        this.addPassenger(40, List.of(DiscountCard.TrainStroke));
+
+        double estimatedPrice = this.helperTicketEstimator("Bordeaux", "Paris", 20);
+        assertEquals(271,
+                estimatedPrice
+        );
     }
 
     // Remise second passagé mais pas de cumule avec une autre carte Remise Family prioritaire
-    // @Test
+    @Test
     void shouldReturn160_WhenFamillyCardOwner_And2PassengerWithSameLastName_And2ndPassengerWithOtherDiscountCard() {
-        this.addMultiplePassenger(40, List.of(DiscountCard.Family), "Polo");
+        this.addMultiplePassenger(40, List.of(DiscountCard.Couple, DiscountCard.Family), "Polo");
         this.addPassenger(40, List.of(DiscountCard.Senior));
-    }
 
-    // Remise avec carte Senior et pas carte family mais remise pour autres membres de la famille
-    // @Test
-    void shouldReturn160_WhenFamillyCardOwner_And2PassengerWithSameLastName_AndSeniorCardOwner() {
-        this.addMultiplePassenger(40, List.of(DiscountCard.Senior, DiscountCard.Family), "Polo");
+        double estimatedPrice = this.helperTicketEstimator("Bordeaux", "Paris", 20);
+        assertEquals(170,
+                estimatedPrice
+        );
     }
-
-    //
 
 }
